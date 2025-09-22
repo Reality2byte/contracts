@@ -58,7 +58,7 @@ contract PayRequest_Integration_Fuzz_Test is PayRequest_Integration_Shared_Test 
                 asset: address(usdt),
                 streamId: 0
             }),
-            creator: users.eve
+            sender: users.eve
         });
 
         // Create the calldata for the {PaymentModule} execution

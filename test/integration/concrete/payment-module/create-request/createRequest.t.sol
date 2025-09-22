@@ -24,7 +24,7 @@ contract CreateRequest_Integration_Concret_Test is CreateRequest_Integration_Sha
 
         // Create a one-off transfer payment request
         paymentRequest =
-            createPaymentRequestWithOneOffTransfer({ asset: address(usdt), creator: users.bob, recipient: users.bob });
+            createPaymentRequestWithOneOffTransfer({ asset: address(usdt), sender: users.bob, recipient: users.bob });
 
         // Run the test
         paymentModule.createRequest(paymentRequest);
@@ -37,7 +37,7 @@ contract CreateRequest_Integration_Concret_Test is CreateRequest_Integration_Sha
         // Create a one-off transfer payment request
         paymentRequest = createPaymentRequestWithOneOffTransfer({
             asset: address(usdt),
-            creator: users.eve,
+            sender: users.eve,
             recipient: address(space)
         });
 
@@ -61,7 +61,7 @@ contract CreateRequest_Integration_Concret_Test is CreateRequest_Integration_Sha
         // Create a one-off transfer payment request
         paymentRequest = createPaymentRequestWithOneOffTransfer({
             asset: address(usdt),
-            creator: users.eve,
+            sender: users.eve,
             recipient: address(space)
         });
 
@@ -93,7 +93,7 @@ contract CreateRequest_Integration_Concret_Test is CreateRequest_Integration_Sha
         // Create a one-off transfer payment request
         paymentRequest = createPaymentRequestWithOneOffTransfer({
             asset: address(usdt),
-            creator: users.eve,
+            sender: users.eve,
             recipient: address(space)
         });
 
@@ -127,7 +127,7 @@ contract CreateRequest_Integration_Concret_Test is CreateRequest_Integration_Sha
         // Create a one-off transfer payment request
         paymentRequest = createPaymentRequestWithOneOffTransfer({
             asset: address(usdt),
-            creator: users.eve,
+            sender: users.eve,
             recipient: address(space)
         });
 
@@ -168,7 +168,7 @@ contract CreateRequest_Integration_Concret_Test is CreateRequest_Integration_Sha
         // Hence, the interval between the start and end time must be at least 1 month
         paymentRequest = createPaymentRequestWithOneOffTransfer({
             asset: address(usdt),
-            creator: users.eve,
+            sender: users.eve,
             recipient: address(space)
         });
 
@@ -182,7 +182,7 @@ contract CreateRequest_Integration_Concret_Test is CreateRequest_Integration_Sha
         vm.expectEmit();
         emit IPaymentModule.RequestCreated({
             requestId: 1,
-            creator: users.eve,
+            sender: users.eve,
             recipient: address(space),
             startTime: paymentRequest.startTime,
             endTime: paymentRequest.endTime,
@@ -225,11 +225,8 @@ contract CreateRequest_Integration_Concret_Test is CreateRequest_Integration_Sha
         vm.startPrank({ msgSender: users.eve });
 
         // Create a one-off transfer payment request
-        paymentRequest = createPaymentWithCustomNoOfTransfers({
-            asset: address(usdt),
-            creator: users.eve,
-            recipient: address(space)
-        });
+        paymentRequest =
+            createPaymentWithCustomNoOfTransfers({ asset: address(usdt), sender: users.eve, recipient: address(space) });
 
         // Alter the payment method to be a linear stream
         paymentRequest.config.method = Types.Method.LinearStream;
@@ -260,11 +257,8 @@ contract CreateRequest_Integration_Concret_Test is CreateRequest_Integration_Sha
         vm.startPrank({ msgSender: users.eve });
 
         // Create a new payment request with an unlimited number of USDT payments
-        paymentRequest = createPaymentWithCustomNoOfTransfers({
-            asset: address(usdt),
-            creator: users.eve,
-            recipient: address(space)
-        });
+        paymentRequest =
+            createPaymentWithCustomNoOfTransfers({ asset: address(usdt), sender: users.eve, recipient: address(space) });
 
         // Create the calldata for the Payment Module execution
         bytes memory data = abi.encodeWithSignature(
@@ -276,7 +270,7 @@ contract CreateRequest_Integration_Concret_Test is CreateRequest_Integration_Sha
         vm.expectEmit();
         emit IPaymentModule.RequestCreated({
             requestId: 1,
-            creator: users.eve,
+            sender: users.eve,
             recipient: address(space),
             startTime: paymentRequest.startTime,
             endTime: paymentRequest.endTime,
@@ -322,7 +316,7 @@ contract CreateRequest_Integration_Concret_Test is CreateRequest_Integration_Sha
         // Hence, the interval between the start and end time must be at least 1 month
         paymentRequest = createPaymentWithRecurringTransfer({
             recurrence: Types.Recurrence.Monthly,
-            creator: users.eve,
+            sender: users.eve,
             recipient: address(space)
         });
 
@@ -358,7 +352,7 @@ contract CreateRequest_Integration_Concret_Test is CreateRequest_Integration_Sha
         // Create a recurring transfer payment request that must be paid on weekly basis
         paymentRequest = createPaymentWithRecurringTransfer({
             recurrence: Types.Recurrence.Weekly,
-            creator: users.eve,
+            sender: users.eve,
             recipient: address(space)
         });
 
@@ -372,7 +366,7 @@ contract CreateRequest_Integration_Concret_Test is CreateRequest_Integration_Sha
         vm.expectEmit();
         emit IPaymentModule.RequestCreated({
             requestId: 1,
-            creator: users.eve,
+            sender: users.eve,
             recipient: address(space),
             startTime: paymentRequest.startTime,
             endTime: paymentRequest.endTime,
@@ -417,7 +411,7 @@ contract CreateRequest_Integration_Concret_Test is CreateRequest_Integration_Sha
         // Create a new paymentRequest with a tranched stream payment
         paymentRequest = createPaymentRequestWithTranchedStream({
             recurrence: Types.Recurrence.Weekly,
-            creator: users.eve,
+            sender: users.eve,
             recipient: address(space)
         });
 
@@ -453,7 +447,7 @@ contract CreateRequest_Integration_Concret_Test is CreateRequest_Integration_Sha
         // Create a new paymentRequest with a tranched stream payment
         paymentRequest = createPaymentRequestWithTranchedStream({
             recurrence: Types.Recurrence.Monthly,
-            creator: users.eve,
+            sender: users.eve,
             recipient: address(space)
         });
 
@@ -490,7 +484,7 @@ contract CreateRequest_Integration_Concret_Test is CreateRequest_Integration_Sha
         // Create a new paymentRequest with a linear stream payment
         paymentRequest = createPaymentRequestWithTranchedStream({
             recurrence: Types.Recurrence.Weekly,
-            creator: users.eve,
+            sender: users.eve,
             recipient: address(space)
         });
 
@@ -526,7 +520,7 @@ contract CreateRequest_Integration_Concret_Test is CreateRequest_Integration_Sha
         // Create a new paymentRequest with a tranched stream payment
         paymentRequest = createPaymentRequestWithTranchedStream({
             recurrence: Types.Recurrence.Weekly,
-            creator: users.eve,
+            sender: users.eve,
             recipient: address(space)
         });
 
@@ -540,7 +534,7 @@ contract CreateRequest_Integration_Concret_Test is CreateRequest_Integration_Sha
         vm.expectEmit();
         emit IPaymentModule.RequestCreated({
             requestId: 1,
-            creator: users.eve,
+            sender: users.eve,
             recipient: address(space),
             startTime: paymentRequest.startTime,
             endTime: paymentRequest.endTime,
@@ -583,7 +577,7 @@ contract CreateRequest_Integration_Concret_Test is CreateRequest_Integration_Sha
         vm.startPrank({ msgSender: users.eve });
 
         // Create a new paymentRequest with a linear stream payment
-        paymentRequest = createPaymentRequestWithLinearStream({ creator: users.eve, recipient: address(space) });
+        paymentRequest = createPaymentRequestWithLinearStream({ sender: users.eve, recipient: address(space) });
 
         // Alter the payment asset by setting it to
         paymentRequest.config.asset = Constants.NATIVE_TOKEN;
@@ -615,7 +609,7 @@ contract CreateRequest_Integration_Concret_Test is CreateRequest_Integration_Sha
         vm.startPrank({ msgSender: users.eve });
 
         // Create a new paymentRequest with a linear stream payment
-        paymentRequest = createPaymentRequestWithLinearStream({ creator: users.eve, recipient: address(space) });
+        paymentRequest = createPaymentRequestWithLinearStream({ sender: users.eve, recipient: address(space) });
 
         // Create the calldata for the Payment Module execution
         bytes memory data = abi.encodeWithSignature(
@@ -627,7 +621,7 @@ contract CreateRequest_Integration_Concret_Test is CreateRequest_Integration_Sha
         vm.expectEmit();
         emit IPaymentModule.RequestCreated({
             requestId: 1,
-            creator: users.eve,
+            sender: users.eve,
             recipient: address(space),
             startTime: paymentRequest.startTime,
             endTime: paymentRequest.endTime,

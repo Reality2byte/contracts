@@ -127,7 +127,7 @@ contract PayPayment_Integration_Concret_Test is PayRequest_Integration_Shared_Te
         // Create a mock payment request with a one-off ETH transfer from the Eve's space
         Types.PaymentRequest memory paymentRequest = createPaymentRequestWithOneOffTransfer({
             asset: Constants.NATIVE_TOKEN,
-            creator: users.eve,
+            sender: users.eve,
             recipient: address(mockBadReceiver)
         });
         executeCreatePaymentRequest({ paymentRequest: paymentRequest, user: users.eve });

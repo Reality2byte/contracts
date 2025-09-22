@@ -25,7 +25,7 @@ contract CreateRequest_Integration_Fuzz_Test is CreateRequest_Integration_Shared
         uint40 startTime,
         uint40 endTime,
         uint128 amount,
-        address creator
+        address sender
     )
         external
         whenCallerContract
@@ -41,7 +41,7 @@ contract CreateRequest_Integration_Fuzz_Test is CreateRequest_Integration_Shared
         // Assume the payment method is within Types.Method enum values (Transfer, LinearStream, TranchedStream) (0, 1, 2)
         vm.assume(paymentMethod < 3);
         vm.assume(recipient != address(0) && recipient != address(this));
-        vm.assume(creator != address(0) && creator != address(this));
+        vm.assume(sender != address(0) && sender != address(this));
         vm.assume(startTime >= uint40(block.timestamp) && startTime < endTime);
         vm.assume(amount > 0);
 
@@ -66,7 +66,7 @@ contract CreateRequest_Integration_Fuzz_Test is CreateRequest_Integration_Shared
                 asset: address(usdt),
                 streamId: 0
             }),
-            creator: creator
+            sender: sender
         });
 
         // Create the calldata for the {PaymentModule} execution
@@ -79,7 +79,7 @@ contract CreateRequest_Integration_Fuzz_Test is CreateRequest_Integration_Shared
         vm.expectEmit();
         emit IPaymentModule.RequestCreated({
             requestId: 1,
-            creator: creator,
+            sender: sender,
             recipient: paymentRequest.recipient,
             startTime: paymentRequest.startTime,
             endTime: paymentRequest.endTime,
@@ -98,7 +98,7 @@ contract CreateRequest_Integration_Fuzz_Test is CreateRequest_Integration_Shared
         Types.Status paymentRequestStatus = paymentModule.statusOf({ requestId: 1 });
 
         assertEq(actualRequest.recipient, paymentRequest.recipient);
-        assertEq(actualRequest.creator, paymentRequest.creator);
+        assertEq(actualRequest.sender, paymentRequest.sender);
         assertEq(uint8(paymentRequestStatus), uint8(Types.Status.Pending));
         assertEq(actualRequest.startTime, paymentRequest.startTime);
         assertEq(actualRequest.endTime, paymentRequest.endTime);

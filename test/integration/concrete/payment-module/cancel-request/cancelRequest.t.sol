@@ -72,8 +72,8 @@ contract CancelRequest_Integration_Concret_Test is CancelRequest_Integration_Sha
         });
 
         // Try to cancel the payment request as Bob
-        // Expect the call to revert with the {OnlyRequestCreatorOrRecipient} error
-        vm.expectRevert(Errors.OnlyRequestCreatorOrRecipient.selector);
+        // Expect the call to revert with the {OnlyRequestSenderOrRecipient} error
+        vm.expectRevert(Errors.OnlyRequestSenderOrRecipient.selector);
 
         // Run the test
         paymentModule.cancelRequest({ requestId: paymentRequestId });
@@ -92,8 +92,8 @@ contract CancelRequest_Integration_Concret_Test is CancelRequest_Integration_Sha
         // Make Bob the caller who IS NOT the recipient or the creator of the payment request
         vm.startPrank({ msgSender: users.bob });
 
-        // Expect the call to revert with the {OnlyRequestCreatorOrRecipient} error
-        vm.expectRevert(Errors.OnlyRequestCreatorOrRecipient.selector);
+        // Expect the call to revert with the {OnlyRequestSenderOrRecipient} error
+        vm.expectRevert(Errors.OnlyRequestSenderOrRecipient.selector);
 
         // Run the test
         paymentModule.cancelRequest({ requestId: paymentRequestId });
@@ -137,8 +137,8 @@ contract CancelRequest_Integration_Concret_Test is CancelRequest_Integration_Sha
         // Make Bob the caller who IS NOT the recipient or creator of the payment request
         vm.startPrank({ msgSender: users.bob });
 
-        // Expect the call to revert with the {OnlyRequestCreatorOrRecipient} error
-        vm.expectRevert(Errors.OnlyRequestCreatorOrRecipient.selector);
+        // Expect the call to revert with the {OnlyRequestSenderOrRecipient} error
+        vm.expectRevert(Errors.OnlyRequestSenderOrRecipient.selector);
 
         // Run the test
         paymentModule.cancelRequest({ requestId: paymentRequestId });
@@ -253,8 +253,8 @@ contract CancelRequest_Integration_Concret_Test is CancelRequest_Integration_Sha
         // Make Bob the caller who IS NOT the recipient or the creator of the payment request
         vm.startPrank({ msgSender: users.bob });
 
-        // Expect the call to revert with the {OnlyRequestCreatorOrRecipient} error
-        vm.expectRevert(Errors.OnlyRequestCreatorOrRecipient.selector);
+        // Expect the call to revert with the {OnlyRequestSenderOrRecipient} error
+        vm.expectRevert(Errors.OnlyRequestSenderOrRecipient.selector);
 
         // Run the test
         paymentModule.cancelRequest({ requestId: paymentRequestId });
