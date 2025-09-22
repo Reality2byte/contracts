@@ -24,7 +24,8 @@ contract CreateRequest_Integration_Fuzz_Test is CreateRequest_Integration_Shared
         address recipient,
         uint40 startTime,
         uint40 endTime,
-        uint128 amount
+        uint128 amount,
+        address creator
     )
         external
         whenCallerContract
@@ -40,6 +41,7 @@ contract CreateRequest_Integration_Fuzz_Test is CreateRequest_Integration_Shared
         // Assume the payment method is within Types.Method enum values (Transfer, LinearStream, TranchedStream) (0, 1, 2)
         vm.assume(paymentMethod < 3);
         vm.assume(recipient != address(0) && recipient != address(this));
+        vm.assume(creator != address(0) && creator != address(this));
         vm.assume(startTime >= uint40(block.timestamp) && startTime < endTime);
         vm.assume(amount > 0);
 
@@ -63,12 +65,13 @@ contract CreateRequest_Integration_Fuzz_Test is CreateRequest_Integration_Shared
                 amount: amount,
                 asset: address(usdt),
                 streamId: 0
-            })
+            }),
+            creator: creator
         });
 
         // Create the calldata for the {PaymentModule} execution
         bytes memory data = abi.encodeWithSignature(
-            "createRequest((bool,bool,uint40,uint40,address,(bool,uint8,uint8,uint40,address,uint128,uint256)))",
+            "createRequest((bool,bool,uint40,uint40,address,(bool,uint8,uint8,uint40,address,uint128,uint256),address))",
             paymentRequest
         );
 
@@ -76,6 +79,7 @@ contract CreateRequest_Integration_Fuzz_Test is CreateRequest_Integration_Shared
         vm.expectEmit();
         emit IPaymentModule.RequestCreated({
             requestId: 1,
+            creator: creator,
             recipient: paymentRequest.recipient,
             startTime: paymentRequest.startTime,
             endTime: paymentRequest.endTime,
@@ -94,6 +98,7 @@ contract CreateRequest_Integration_Fuzz_Test is CreateRequest_Integration_Shared
         Types.Status paymentRequestStatus = paymentModule.statusOf({ requestId: 1 });
 
         assertEq(actualRequest.recipient, paymentRequest.recipient);
+        assertEq(actualRequest.creator, paymentRequest.creator);
         assertEq(uint8(paymentRequestStatus), uint8(Types.Status.Pending));
         assertEq(actualRequest.startTime, paymentRequest.startTime);
         assertEq(actualRequest.endTime, paymentRequest.endTime);

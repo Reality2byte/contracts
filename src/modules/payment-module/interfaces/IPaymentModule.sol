@@ -12,13 +12,14 @@ interface IPaymentModule {
 
     /// @notice Emitted when a payment request is created
     /// @param requestId The ID of the payment request
+    /// @param sender The address sending the payment
     /// @param recipient The address receiving the payment
     /// @param startTime The timestamp when the payment request takes effect
     /// @param endTime The timestamp by which the payment request must be paid
     /// @param config Struct representing the payment details associated with the payment request
     event RequestCreated(
         uint256 indexed requestId,
-        address indexed creator,
+        address indexed sender,
         address indexed recipient,
         uint40 startTime,
         uint40 endTime,

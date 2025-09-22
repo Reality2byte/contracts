@@ -67,8 +67,8 @@ library Types {
     /// @param startTime The unix timestamp indicating when the payment starts
     /// @param endTime The unix timestamp indicating when the payment ends
     /// @param recipient The address to which the payment is made
-    /// @param creator The address which created the request
     /// @param payment The payment configurations
+    /// @param sender The address where the payment is made from
     struct PaymentRequest {
         // slot 0
         bool wasCanceled;
@@ -79,6 +79,6 @@ library Types {
         // slot 1, 2 and 3
         Config config;
         // slot 4
-        address creator;
+        address sender;
     }
 }

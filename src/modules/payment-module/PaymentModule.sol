@@ -222,7 +222,7 @@ contract PaymentModule is IPaymentModule, StreamManager, UUPSUpgradeable {
                 asset: request.config.asset,
                 streamId: 0
             }),
-            creator: request.creator
+            sender: request.sender
         });
 
         // Effects: increment the next payment request ID
@@ -234,7 +234,7 @@ contract PaymentModule is IPaymentModule, StreamManager, UUPSUpgradeable {
         // Log the payment request creation
         emit RequestCreated({
             requestId: requestId,
-            creator: request.creator,
+            sender: request.sender,
             recipient: request.recipient,
             startTime: request.startTime,
             endTime: request.endTime,
@@ -272,6 +272,12 @@ contract PaymentModule is IPaymentModule, StreamManager, UUPSUpgradeable {
             revert Errors.RequestPaid();
         } else if (requestStatus == Types.Status.Canceled) {
             revert Errors.RequestCanceled();
+        }
+
+        // A payment request can have request.sender already initialized in cases where the payer of the request is known from the start
+        // If request.sender is address(0) initialize it with msg.sender
+        if (request.sender == address(0)) {
+            request.sender = msg.sender;
         }
 
         // Effects: decrease the number of payments left
@@ -332,17 +338,17 @@ contract PaymentModule is IPaymentModule, StreamManager, UUPSUpgradeable {
             revert Errors.RequestCanceled();
         }
 
-        // Checks: `msg.sender` is the recipient or the creator if the payment request status is `Pending`
+        // Checks: `msg.sender` is the recipient or the sender if the payment request status is `Pending`
         if (requestStatus == Types.Status.Pending) {
-            if (msg.sender != request.recipient && msg.sender != request.creator) {
-                revert Errors.OnlyRequestCreatorOrRecipient();
+            if (msg.sender != request.recipient && msg.sender != request.sender) {
+                revert Errors.OnlyRequestSenderOrRecipient();
             }
         }
-        // Checks: `msg.sender` is the recipient or the creator if the payment request status is `Ongoing`
+        // Checks: `msg.sender` is the recipient or the sender if the payment request status is `Ongoing`
         // and the payment method is transfer-based
         else if (request.config.method == Types.Method.Transfer) {
-            if (msg.sender != request.recipient && msg.sender != request.creator) {
-                revert Errors.OnlyRequestCreatorOrRecipient();
+            if (msg.sender != request.recipient && msg.sender != request.sender) {
+                revert Errors.OnlyRequestSenderOrRecipient();
             }
         }
         // Checks, Effects, Interactions: cancel the stream if payment request has already been accepted

@@ -50,7 +50,7 @@ contract CancelRequest_Integration_Concret_Test is CancelRequest_Integration_Sha
         paymentModule.cancelRequest({ requestId: paymentRequestId });
     }
 
-    function test_RevertWhen_PaymentMethodTransfer_StatusAccepted_SenderNotPaymentRecipient()
+    function test_RevertWhen_PaymentMethodTransfer_StatusAccepted_SenderNotCreatorOrPaymentRecipient()
         external
         whenRequestNotAlreadyPaid
         whenRequestNotCanceled
@@ -72,14 +72,14 @@ contract CancelRequest_Integration_Concret_Test is CancelRequest_Integration_Sha
         });
 
         // Try to cancel the payment request as Bob
-        // Expect the call to revert with the {OnlyRequestRecipient} error
-        vm.expectRevert(Errors.OnlyRequestRecipient.selector);
+        // Expect the call to revert with the {OnlyRequestCreatorOrRecipient} error
+        vm.expectRevert(Errors.OnlyRequestCreatorOrRecipient.selector);
 
         // Run the test
         paymentModule.cancelRequest({ requestId: paymentRequestId });
     }
 
-    function test_RevertWhen_PaymentMethodTransfer_StatusPending_SenderNotPaymentRecipient()
+    function test_RevertWhen_PaymentMethodTransfer_StatusPending_SenderNotPaymentCreatorOrRecipient()
         external
         whenRequestNotAlreadyPaid
         whenRequestNotCanceled
@@ -89,11 +89,11 @@ contract CancelRequest_Integration_Concret_Test is CancelRequest_Integration_Sha
         // Set the one-off ETH transfer payment request as current one
         uint256 paymentRequestId = 2;
 
-        // Make Bob the caller who IS NOT the recipient of the payment request
+        // Make Bob the caller who IS NOT the recipient or the creator of the payment request
         vm.startPrank({ msgSender: users.bob });
 
-        // Expect the call to revert with the {OnlyRequestRecipient} error
-        vm.expectRevert(Errors.OnlyRequestRecipient.selector);
+        // Expect the call to revert with the {OnlyRequestCreatorOrRecipient} error
+        vm.expectRevert(Errors.OnlyRequestCreatorOrRecipient.selector);
 
         // Run the test
         paymentModule.cancelRequest({ requestId: paymentRequestId });
@@ -124,7 +124,7 @@ contract CancelRequest_Integration_Concret_Test is CancelRequest_Integration_Sha
         assertEq(uint8(paymentRequestStatus), uint8(Types.Status.Canceled));
     }
 
-    function test_RevertWhen_PaymentMethodLinearStream_StatusPending_SenderNotPaymentRecipient()
+    function test_RevertWhen_PaymentMethodLinearStream_StatusPending_SenderNotCreatorOrPaymentRecipient()
         external
         whenRequestNotAlreadyPaid
         whenRequestNotCanceled
@@ -134,11 +134,11 @@ contract CancelRequest_Integration_Concret_Test is CancelRequest_Integration_Sha
         // Set the current payment request as a linear stream-based one
         uint256 paymentRequestId = 5;
 
-        // Make Bob the caller who IS NOT the recipient of the payment request
+        // Make Bob the caller who IS NOT the recipient or creator of the payment request
         vm.startPrank({ msgSender: users.bob });
 
-        // Expect the call to revert with the {OnlyRequestRecipient} error
-        vm.expectRevert(Errors.OnlyRequestRecipient.selector);
+        // Expect the call to revert with the {OnlyRequestCreatorOrRecipient} error
+        vm.expectRevert(Errors.OnlyRequestCreatorOrRecipient.selector);
 
         // Run the test
         paymentModule.cancelRequest({ requestId: paymentRequestId });
@@ -240,7 +240,7 @@ contract CancelRequest_Integration_Concret_Test is CancelRequest_Integration_Sha
         assertEq(uint8(paymentRequestStatus), uint8(Types.Status.Canceled));
     }
 
-    function test_RevertWhen_PaymentMethodTranchedStream_StatusPending_SenderNotPaymentRecipient()
+    function test_RevertWhen_PaymentMethodTranchedStream_StatusPending_SenderNotCreatorOrPaymentRecipient()
         external
         whenRequestNotAlreadyPaid
         whenRequestNotCanceled
@@ -250,11 +250,11 @@ contract CancelRequest_Integration_Concret_Test is CancelRequest_Integration_Sha
         // Set the current payment request as a tranched stream-based one
         uint256 paymentRequestId = 5;
 
-        // Make Bob the caller who IS NOT the recipient of the payment request
+        // Make Bob the caller who IS NOT the recipient or the creator of the payment request
         vm.startPrank({ msgSender: users.bob });
 
-        // Expect the call to revert with the {OnlyRequestRecipient} error
-        vm.expectRevert(Errors.OnlyRequestRecipient.selector);
+        // Expect the call to revert with the {OnlyRequestCreatorOrRecipient} error
+        vm.expectRevert(Errors.OnlyRequestCreatorOrRecipient.selector);
 
         // Run the test
         paymentModule.cancelRequest({ requestId: paymentRequestId });
