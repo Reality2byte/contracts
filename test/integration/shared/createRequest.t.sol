@@ -66,6 +66,10 @@ abstract contract CreateRequest_Integration_Shared_Test is Integration_Test {
         _nextRequestId = 7;
     }
 
+    modifier whenNotZeroAddress() {
+        _;
+    }
+
     modifier whenCallerContract() {
         _;
     }
