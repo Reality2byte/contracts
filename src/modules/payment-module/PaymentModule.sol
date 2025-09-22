@@ -221,7 +221,8 @@ contract PaymentModule is IPaymentModule, StreamManager, UUPSUpgradeable {
                 amount: request.config.amount,
                 asset: request.config.asset,
                 streamId: 0
-            })
+            }),
+            creator: request.creator
         });
 
         // Effects: increment the next payment request ID
@@ -233,6 +234,7 @@ contract PaymentModule is IPaymentModule, StreamManager, UUPSUpgradeable {
         // Log the payment request creation
         emit RequestCreated({
             requestId: requestId,
+            creator: request.creator,
             recipient: request.recipient,
             startTime: request.startTime,
             endTime: request.endTime,
@@ -330,17 +332,17 @@ contract PaymentModule is IPaymentModule, StreamManager, UUPSUpgradeable {
             revert Errors.RequestCanceled();
         }
 
-        // Checks: `msg.sender` is the recipient if the payment request status is `Pending`
+        // Checks: `msg.sender` is the recipient or the creator if the payment request status is `Pending`
         if (requestStatus == Types.Status.Pending) {
-            if (request.recipient != msg.sender) {
-                revert Errors.OnlyRequestRecipient();
+            if (msg.sender != request.recipient && msg.sender != request.creator) {
+                revert Errors.OnlyRequestCreatorOrRecipient();
             }
         }
-        // Checks: `msg.sender` is the recipient if the payment request status is `Ongoing`
+        // Checks: `msg.sender` is the recipient or the creator if the payment request status is `Ongoing`
         // and the payment method is transfer-based
         else if (request.config.method == Types.Method.Transfer) {
-            if (request.recipient != msg.sender) {
-                revert Errors.OnlyRequestRecipient();
+            if (msg.sender != request.recipient && msg.sender != request.creator) {
+                revert Errors.OnlyRequestCreatorOrRecipient();
             }
         }
         // Checks, Effects, Interactions: cancel the stream if payment request has already been accepted
