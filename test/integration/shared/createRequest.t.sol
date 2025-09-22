@@ -63,7 +63,16 @@ abstract contract CreateRequest_Integration_Shared_Test is Integration_Test {
         paymentRequests[6] = paymentRequest;
         executeCreatePaymentRequest({ paymentRequest: paymentRequest, user: users.eve });
 
-        _nextRequestId = 7;
+        // Create a mock payment request with a one-off ETH transfer and sender not initialized (address(0))
+        paymentRequest = createPaymentRequestWithOneOffTransfer({
+            asset: Constants.NATIVE_TOKEN,
+            sender: address(0),
+            recipient: address(space)
+        });
+        paymentRequests[7] = paymentRequest;
+        executeCreatePaymentRequest({ paymentRequest: paymentRequest, user: users.eve });
+
+        _nextRequestId = 8;
     }
 
     modifier whenNotZeroAddress() {

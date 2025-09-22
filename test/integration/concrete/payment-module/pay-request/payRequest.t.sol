@@ -199,6 +199,62 @@ contract PayPayment_Integration_Concret_Test is PayRequest_Integration_Shared_Te
         assertEq(address(space).balance, balanceOfRecipientBefore + paymentRequests[paymentRequestId].config.amount);
     }
 
+    function test_PayRequest_PaymentMethodTransfer_NativeToken_OneOff_SenderZeroAddress()
+        external
+        whenRequestNotNull
+        whenRequestNotExpired
+        whenRequestNotAlreadyPaid
+        whenRequestNotCanceled
+        givenPaymentMethodTransfer
+        givenPaymentAmountInNativeToken
+        whenPaymentAmountEqualToPaymentValue
+        whenNativeTokenPaymentSucceeds
+    {
+        // Set the one-off ETH transfer payment request without initialized sender as current one
+        uint256 paymentRequestId = 7;
+
+        // Make Bob the payer for the default paymentRequest
+        vm.startPrank({ msgSender: users.bob });
+
+        // Store the ETH balances of Bob and recipient before paying the payment request
+        uint256 balanceOfBobBefore = address(users.bob).balance;
+        uint256 balanceOfRecipientBefore = address(space).balance;
+
+        // Expect the {RequestPaid} event to be emitted
+        vm.expectEmit();
+        emit IPaymentModule.RequestPaid({
+            requestId: paymentRequestId,
+            payer: users.bob,
+            config: Types.Config({
+                canExpire: paymentRequests[paymentRequestId].config.canExpire,
+                method: paymentRequests[paymentRequestId].config.method,
+                recurrence: paymentRequests[paymentRequestId].config.recurrence,
+                paymentsLeft: 0,
+                asset: paymentRequests[paymentRequestId].config.asset,
+                amount: paymentRequests[paymentRequestId].config.amount,
+                streamId: 0
+            })
+        });
+
+        // Run the test
+        paymentModule.payRequest{ value: paymentRequests[paymentRequestId].config.amount }({
+            requestId: paymentRequestId
+        });
+
+        // Assert the actual and the expected state of the payment request
+        Types.PaymentRequest memory paymentRequest = paymentModule.getRequest({ requestId: paymentRequestId });
+        Types.Status paymentRequestStatus = paymentModule.statusOf({ requestId: paymentRequestId });
+
+        assertEq(uint8(paymentRequestStatus), uint8(Types.Status.Paid));
+        assertEq(paymentRequest.config.paymentsLeft, 0);
+
+        // Assert the balances of payer and recipient
+        assertEq(address(users.bob).balance, balanceOfBobBefore - paymentRequests[paymentRequestId].config.amount);
+        assertEq(address(space).balance, balanceOfRecipientBefore + paymentRequests[paymentRequestId].config.amount);
+        // Assert the request.sender initialization
+        assertEq(paymentRequest.sender, users.bob);
+    }
+
     function test_PayRequest_PaymentMethodTransfer_ERC20Token_Recurring()
         external
         whenRequestNotNull
