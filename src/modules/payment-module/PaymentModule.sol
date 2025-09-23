@@ -203,7 +203,8 @@ contract PaymentModule is IPaymentModule, StreamManager, UUPSUpgradeable {
                 amount: request.config.amount,
                 asset: request.config.asset,
                 streamId: 0
-            })
+            }),
+            sender: request.sender
         });
 
         // Effects: increment the next payment request ID
@@ -215,6 +216,7 @@ contract PaymentModule is IPaymentModule, StreamManager, UUPSUpgradeable {
         // Log the payment request creation
         emit RequestCreated({
             requestId: requestId,
+            sender: request.sender,
             recipient: request.recipient,
             startTime: request.startTime,
             endTime: request.endTime,
@@ -228,7 +230,7 @@ contract PaymentModule is IPaymentModule, StreamManager, UUPSUpgradeable {
         PaymentModuleStorage storage $ = _getPaymentModuleStorage();
 
         // Load the payment request state from storage
-        Types.PaymentRequest memory request = $.requests[requestId];
+        Types.PaymentRequest storage request = $.requests[requestId];
 
         // Checks: the payment request is not null
         if (request.recipient == address(0)) {
@@ -252,6 +254,12 @@ contract PaymentModule is IPaymentModule, StreamManager, UUPSUpgradeable {
             revert Errors.RequestPaid();
         } else if (requestStatus == Types.Status.Canceled) {
             revert Errors.RequestCanceled();
+        }
+
+        // Checks: `request.sender` is uninitialized, otherwise set it to `msg.sender`
+        // Note: may already be set if the payer was specified when the request was created
+        if (request.sender == address(0)) {
+            request.sender = msg.sender;
         }
 
         // Effects: decrease the number of payments left
@@ -312,17 +320,12 @@ contract PaymentModule is IPaymentModule, StreamManager, UUPSUpgradeable {
             revert Errors.RequestCanceled();
         }
 
-        // Checks: `msg.sender` is the recipient if the payment request status is `Pending`
-        if (requestStatus == Types.Status.Pending) {
-            if (request.recipient != msg.sender) {
-                revert Errors.OnlyRequestRecipient();
-            }
-        }
-        // Checks: `msg.sender` is the recipient if the payment request status is `Ongoing`
-        // and the payment method is transfer-based
-        else if (request.config.method == Types.Method.Transfer) {
-            if (request.recipient != msg.sender) {
-                revert Errors.OnlyRequestRecipient();
+        // Checks: `msg.sender` is the recipient or the sender when:
+        // - the request status is `Pending`, OR
+        // - the status is `Ongoing` or `Expired` and the payment method is transfer-based
+        if (requestStatus == Types.Status.Pending || request.config.method == Types.Method.Transfer) {
+            if (msg.sender != request.recipient && msg.sender != request.sender) {
+                revert Errors.OnlyRequestSenderOrRecipient();
             }
         }
         // Checks, Effects, Interactions: cancel the stream if payment request has already been accepted

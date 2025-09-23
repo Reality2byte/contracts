@@ -20,11 +20,12 @@ contract CreateRequest_Integration_Concret_Test is CreateRequest_Integration_Sha
         vm.startPrank({ msgSender: users.eve });
 
         // Create a one-off transfer payment request with zero address recipient to simulate error
-        paymentRequest = createPaymentRequestWithOneOffTransfer({ asset: address(usdt), recipient: address(0) });
+        paymentRequest =
+            createPaymentRequestWithOneOffTransfer({ asset: address(usdt), sender: users.eve, recipient: address(0) });
 
         // Create the calldata for the Payment Module execution
         bytes memory data = abi.encodeWithSignature(
-            "createRequest((bool,bool,uint40,uint40,address,(bool,uint8,uint8,uint40,address,uint128,uint256)))",
+            "createRequest((bool,bool,uint40,uint40,address,(bool,uint8,uint8,uint40,address,uint128,uint256),address))",
             paymentRequest
         );
 
@@ -40,14 +41,18 @@ contract CreateRequest_Integration_Concret_Test is CreateRequest_Integration_Sha
         vm.startPrank({ msgSender: users.eve });
 
         // Create a one-off transfer payment request
-        paymentRequest = createPaymentRequestWithOneOffTransfer({ asset: address(usdt), recipient: address(space) });
+        paymentRequest = createPaymentRequestWithOneOffTransfer({
+            asset: address(usdt),
+            sender: users.eve,
+            recipient: address(space)
+        });
 
         // Set the payment amount to zero to simulate the error
         paymentRequest.config.amount = 0;
 
         // Create the calldata for the Payment Module execution
         bytes memory data = abi.encodeWithSignature(
-            "createRequest((bool,bool,uint40,uint40,address,(bool,uint8,uint8,uint40,address,uint128,uint256)))",
+            "createRequest((bool,bool,uint40,uint40,address,(bool,uint8,uint8,uint40,address,uint128,uint256),address))",
             paymentRequest
         );
 
@@ -63,7 +68,11 @@ contract CreateRequest_Integration_Concret_Test is CreateRequest_Integration_Sha
         vm.startPrank({ msgSender: users.eve });
 
         // Create a one-off transfer payment request
-        paymentRequest = createPaymentRequestWithOneOffTransfer({ asset: address(usdt), recipient: address(space) });
+        paymentRequest = createPaymentRequestWithOneOffTransfer({
+            asset: address(usdt),
+            sender: users.eve,
+            recipient: address(space)
+        });
 
         // Set the start time to be the current timestamp and the end time one second earlier
         paymentRequest.startTime = uint40(block.timestamp);
@@ -71,7 +80,7 @@ contract CreateRequest_Integration_Concret_Test is CreateRequest_Integration_Sha
 
         // Create the calldata for the Payment Module execution
         bytes memory data = abi.encodeWithSignature(
-            "createRequest((bool,bool,uint40,uint40,address,(bool,uint8,uint8,uint40,address,uint128,uint256)))",
+            "createRequest((bool,bool,uint40,uint40,address,(bool,uint8,uint8,uint40,address,uint128,uint256),address))",
             paymentRequest
         );
 
@@ -92,7 +101,11 @@ contract CreateRequest_Integration_Concret_Test is CreateRequest_Integration_Sha
         vm.startPrank({ msgSender: users.eve });
 
         // Create a one-off transfer payment request
-        paymentRequest = createPaymentRequestWithOneOffTransfer({ asset: address(usdt), recipient: address(space) });
+        paymentRequest = createPaymentRequestWithOneOffTransfer({
+            asset: address(usdt),
+            sender: users.eve,
+            recipient: address(space)
+        });
 
         // Set the block.timestamp to 1641070800
         vm.warp(1_641_070_800);
@@ -104,7 +117,7 @@ contract CreateRequest_Integration_Concret_Test is CreateRequest_Integration_Sha
 
         // Create the calldata for the Payment Module execution
         bytes memory data = abi.encodeWithSignature(
-            "createRequest((bool,bool,uint40,uint40,address,(bool,uint8,uint8,uint40,address,uint128,uint256)))",
+            "createRequest((bool,bool,uint40,uint40,address,(bool,uint8,uint8,uint40,address,uint128,uint256),address))",
             paymentRequest
         );
 
@@ -128,11 +141,15 @@ contract CreateRequest_Integration_Concret_Test is CreateRequest_Integration_Sha
 
         // Create a recurring transfer payment request that must be paid on a monthly basis
         // Hence, the interval between the start and end time must be at least 1 month
-        paymentRequest = createPaymentRequestWithOneOffTransfer({ asset: address(usdt), recipient: address(space) });
+        paymentRequest = createPaymentRequestWithOneOffTransfer({
+            asset: address(usdt),
+            sender: users.eve,
+            recipient: address(space)
+        });
 
         // Create the calldata for the Payment Module execution
         bytes memory data = abi.encodeWithSignature(
-            "createRequest((bool,bool,uint40,uint40,address,(bool,uint8,uint8,uint40,address,uint128,uint256)))",
+            "createRequest((bool,bool,uint40,uint40,address,(bool,uint8,uint8,uint40,address,uint128,uint256),address))",
             paymentRequest
         );
 
@@ -140,6 +157,7 @@ contract CreateRequest_Integration_Concret_Test is CreateRequest_Integration_Sha
         vm.expectEmit();
         emit IPaymentModule.RequestCreated({
             requestId: 1,
+            sender: users.eve,
             recipient: address(space),
             startTime: paymentRequest.startTime,
             endTime: paymentRequest.endTime,
@@ -181,14 +199,15 @@ contract CreateRequest_Integration_Concret_Test is CreateRequest_Integration_Sha
         vm.startPrank({ msgSender: users.eve });
 
         // Create a one-off transfer payment request
-        paymentRequest = createPaymentWithCustomNoOfTransfers({ asset: address(usdt), recipient: address(space) });
+        paymentRequest =
+            createPaymentWithCustomNoOfTransfers({ asset: address(usdt), sender: users.eve, recipient: address(space) });
 
         // Alter the payment method to be a linear stream
         paymentRequest.config.method = Types.Method.LinearStream;
 
         // Create the calldata for the {PaymentModule} execution
         bytes memory data = abi.encodeWithSignature(
-            "createRequest((bool,bool,uint40,uint40,address,(bool,uint8,uint8,uint40,address,uint128,uint256)))",
+            "createRequest((bool,bool,uint40,uint40,address,(bool,uint8,uint8,uint40,address,uint128,uint256),address))",
             paymentRequest
         );
 
@@ -211,11 +230,12 @@ contract CreateRequest_Integration_Concret_Test is CreateRequest_Integration_Sha
         vm.startPrank({ msgSender: users.eve });
 
         // Create a new payment request with an unlimited number of USDT payments
-        paymentRequest = createPaymentWithCustomNoOfTransfers({ asset: address(usdt), recipient: address(space) });
+        paymentRequest =
+            createPaymentWithCustomNoOfTransfers({ asset: address(usdt), sender: users.eve, recipient: address(space) });
 
         // Create the calldata for the Payment Module execution
         bytes memory data = abi.encodeWithSignature(
-            "createRequest((bool,bool,uint40,uint40,address,(bool,uint8,uint8,uint40,address,uint128,uint256)))",
+            "createRequest((bool,bool,uint40,uint40,address,(bool,uint8,uint8,uint40,address,uint128,uint256),address))",
             paymentRequest
         );
 
@@ -223,6 +243,7 @@ contract CreateRequest_Integration_Concret_Test is CreateRequest_Integration_Sha
         vm.expectEmit();
         emit IPaymentModule.RequestCreated({
             requestId: 1,
+            sender: users.eve,
             recipient: address(space),
             startTime: paymentRequest.startTime,
             endTime: paymentRequest.endTime,
@@ -265,15 +286,18 @@ contract CreateRequest_Integration_Concret_Test is CreateRequest_Integration_Sha
 
         // Create a recurring transfer payment request that must be paid on a monthly basis
         // Hence, the interval between the start and end time must be at least 1 month
-        paymentRequest =
-            createPaymentWithRecurringTransfer({ recurrence: Types.Recurrence.Monthly, recipient: address(space) });
+        paymentRequest = createPaymentWithRecurringTransfer({
+            recurrence: Types.Recurrence.Monthly,
+            sender: users.eve,
+            recipient: address(space)
+        });
 
         // Alter the end time to be 3 weeks from now
         paymentRequest.endTime = uint40(block.timestamp) + 3 weeks;
 
         // Create the calldata for the Payment Module execution
         bytes memory data = abi.encodeWithSignature(
-            "createRequest((bool,bool,uint40,uint40,address,(bool,uint8,uint8,uint40,address,uint128,uint256)))",
+            "createRequest((bool,bool,uint40,uint40,address,(bool,uint8,uint8,uint40,address,uint128,uint256),address))",
             paymentRequest
         );
 
@@ -297,12 +321,15 @@ contract CreateRequest_Integration_Concret_Test is CreateRequest_Integration_Sha
         vm.startPrank({ msgSender: users.eve });
 
         // Create a recurring transfer payment request that must be paid on weekly basis
-        paymentRequest =
-            createPaymentWithRecurringTransfer({ recurrence: Types.Recurrence.Weekly, recipient: address(space) });
+        paymentRequest = createPaymentWithRecurringTransfer({
+            recurrence: Types.Recurrence.Weekly,
+            sender: users.eve,
+            recipient: address(space)
+        });
 
         // Create the calldata for the Payment Module execution
         bytes memory data = abi.encodeWithSignature(
-            "createRequest((bool,bool,uint40,uint40,address,(bool,uint8,uint8,uint40,address,uint128,uint256)))",
+            "createRequest((bool,bool,uint40,uint40,address,(bool,uint8,uint8,uint40,address,uint128,uint256),address))",
             paymentRequest
         );
 
@@ -310,6 +337,7 @@ contract CreateRequest_Integration_Concret_Test is CreateRequest_Integration_Sha
         vm.expectEmit();
         emit IPaymentModule.RequestCreated({
             requestId: 1,
+            sender: users.eve,
             recipient: address(space),
             startTime: paymentRequest.startTime,
             endTime: paymentRequest.endTime,
@@ -351,8 +379,11 @@ contract CreateRequest_Integration_Concret_Test is CreateRequest_Integration_Sha
         vm.startPrank({ msgSender: users.eve });
 
         // Create a new paymentRequest with a tranched stream payment
-        paymentRequest =
-            createPaymentRequestWithTranchedStream({ recurrence: Types.Recurrence.Weekly, recipient: address(space) });
+        paymentRequest = createPaymentRequestWithTranchedStream({
+            recurrence: Types.Recurrence.Weekly,
+            sender: users.eve,
+            recipient: address(space)
+        });
 
         // Alter the payment recurrence by setting it to one-off
         paymentRequest.config.recurrence = Types.Recurrence.OneOff;
@@ -362,7 +393,7 @@ contract CreateRequest_Integration_Concret_Test is CreateRequest_Integration_Sha
 
         // Create the calldata for the Payment Module execution
         bytes memory data = abi.encodeWithSignature(
-            "createRequest((bool,bool,uint40,uint40,address,(bool,uint8,uint8,uint40,address,uint128,uint256)))",
+            "createRequest((bool,bool,uint40,uint40,address,(bool,uint8,uint8,uint40,address,uint128,uint256),address))",
             paymentRequest
         );
 
@@ -383,8 +414,11 @@ contract CreateRequest_Integration_Concret_Test is CreateRequest_Integration_Sha
         vm.startPrank({ msgSender: users.eve });
 
         // Create a new paymentRequest with a tranched stream payment
-        paymentRequest =
-            createPaymentRequestWithTranchedStream({ recurrence: Types.Recurrence.Monthly, recipient: address(space) });
+        paymentRequest = createPaymentRequestWithTranchedStream({
+            recurrence: Types.Recurrence.Monthly,
+            sender: users.eve,
+            recipient: address(space)
+        });
 
         // Alter the end time to be 3 weeks from now
         paymentRequest.endTime = uint40(block.timestamp) + 3 weeks;
@@ -394,7 +428,7 @@ contract CreateRequest_Integration_Concret_Test is CreateRequest_Integration_Sha
 
         // Create the calldata for the Payment Module execution
         bytes memory data = abi.encodeWithSignature(
-            "createRequest((bool,bool,uint40,uint40,address,(bool,uint8,uint8,uint40,address,uint128,uint256)))",
+            "createRequest((bool,bool,uint40,uint40,address,(bool,uint8,uint8,uint40,address,uint128,uint256),address))",
             paymentRequest
         );
 
@@ -416,8 +450,11 @@ contract CreateRequest_Integration_Concret_Test is CreateRequest_Integration_Sha
         vm.startPrank({ msgSender: users.eve });
 
         // Create a new paymentRequest with a linear stream payment
-        paymentRequest =
-            createPaymentRequestWithTranchedStream({ recurrence: Types.Recurrence.Weekly, recipient: address(space) });
+        paymentRequest = createPaymentRequestWithTranchedStream({
+            recurrence: Types.Recurrence.Weekly,
+            sender: users.eve,
+            recipient: address(space)
+        });
 
         // Alter the payment asset by setting it to
         paymentRequest.config.asset = Constants.NATIVE_TOKEN;
@@ -427,7 +464,7 @@ contract CreateRequest_Integration_Concret_Test is CreateRequest_Integration_Sha
 
         // Create the calldata for the Payment Module execution
         bytes memory data = abi.encodeWithSignature(
-            "createRequest((bool,bool,uint40,uint40,address,(bool,uint8,uint8,uint40,address,uint128,uint256)))",
+            "createRequest((bool,bool,uint40,uint40,address,(bool,uint8,uint8,uint40,address,uint128,uint256),address))",
             paymentRequest
         );
 
@@ -448,12 +485,15 @@ contract CreateRequest_Integration_Concret_Test is CreateRequest_Integration_Sha
         vm.startPrank({ msgSender: users.eve });
 
         // Create a new paymentRequest with a tranched stream payment
-        paymentRequest =
-            createPaymentRequestWithTranchedStream({ recurrence: Types.Recurrence.Weekly, recipient: address(space) });
+        paymentRequest = createPaymentRequestWithTranchedStream({
+            recurrence: Types.Recurrence.Weekly,
+            sender: users.eve,
+            recipient: address(space)
+        });
 
         // Create the calldata for the Payment Module execution
         bytes memory data = abi.encodeWithSignature(
-            "createRequest((bool,bool,uint40,uint40,address,(bool,uint8,uint8,uint40,address,uint128,uint256)))",
+            "createRequest((bool,bool,uint40,uint40,address,(bool,uint8,uint8,uint40,address,uint128,uint256),address))",
             paymentRequest
         );
 
@@ -461,6 +501,7 @@ contract CreateRequest_Integration_Concret_Test is CreateRequest_Integration_Sha
         vm.expectEmit();
         emit IPaymentModule.RequestCreated({
             requestId: 1,
+            sender: users.eve,
             recipient: address(space),
             startTime: paymentRequest.startTime,
             endTime: paymentRequest.endTime,
@@ -502,7 +543,7 @@ contract CreateRequest_Integration_Concret_Test is CreateRequest_Integration_Sha
         vm.startPrank({ msgSender: users.eve });
 
         // Create a new paymentRequest with a linear stream payment
-        paymentRequest = createPaymentRequestWithLinearStream({ recipient: address(space) });
+        paymentRequest = createPaymentRequestWithLinearStream({ sender: users.eve, recipient: address(space) });
 
         // Alter the payment asset by setting it to
         paymentRequest.config.asset = Constants.NATIVE_TOKEN;
@@ -512,7 +553,7 @@ contract CreateRequest_Integration_Concret_Test is CreateRequest_Integration_Sha
 
         // Create the calldata for the Payment Module execution
         bytes memory data = abi.encodeWithSignature(
-            "createRequest((bool,bool,uint40,uint40,address,(bool,uint8,uint8,uint40,address,uint128,uint256)))",
+            "createRequest((bool,bool,uint40,uint40,address,(bool,uint8,uint8,uint40,address,uint128,uint256),address))",
             paymentRequest
         );
 
@@ -533,11 +574,11 @@ contract CreateRequest_Integration_Concret_Test is CreateRequest_Integration_Sha
         vm.startPrank({ msgSender: users.eve });
 
         // Create a new paymentRequest with a linear stream payment
-        paymentRequest = createPaymentRequestWithLinearStream({ recipient: address(space) });
+        paymentRequest = createPaymentRequestWithLinearStream({ sender: users.eve, recipient: address(space) });
 
         // Create the calldata for the Payment Module execution
         bytes memory data = abi.encodeWithSignature(
-            "createRequest((bool,bool,uint40,uint40,address,(bool,uint8,uint8,uint40,address,uint128,uint256)))",
+            "createRequest((bool,bool,uint40,uint40,address,(bool,uint8,uint8,uint40,address,uint128,uint256),address))",
             paymentRequest
         );
 
@@ -545,6 +586,7 @@ contract CreateRequest_Integration_Concret_Test is CreateRequest_Integration_Sha
         vm.expectEmit();
         emit IPaymentModule.RequestCreated({
             requestId: 1,
+            sender: users.eve,
             recipient: address(space),
             startTime: paymentRequest.startTime,
             endTime: paymentRequest.endTime,
