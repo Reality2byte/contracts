@@ -68,7 +68,7 @@ library Types {
     /// @param endTime The unix timestamp indicating when the payment ends
     /// @param recipient The address to which the payment is made
     /// @param payment The payment configurations
-    /// @param sender The address where the payment is made from
+    /// @param sender The address from which the payment is made
     struct PaymentRequest {
         // slot 0
         bool wasCanceled;

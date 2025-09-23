@@ -256,8 +256,8 @@ contract PaymentModule is IPaymentModule, StreamManager, UUPSUpgradeable {
             revert Errors.RequestCanceled();
         }
 
-        // A payment request can have request.sender already initialized in cases where the payer of the request is known from the start
-        // If request.sender is address(0) initialize it with msg.sender
+        // Checks: `request.sender` is uninitialized, otherwise set it to `msg.sender`
+        // Note: may already be set if the payer was specified when the request was created
         if (request.sender == address(0)) {
             request.sender = msg.sender;
         }
