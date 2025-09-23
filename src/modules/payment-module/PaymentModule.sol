@@ -320,15 +320,10 @@ contract PaymentModule is IPaymentModule, StreamManager, UUPSUpgradeable {
             revert Errors.RequestCanceled();
         }
 
-        // Checks: `msg.sender` is the recipient or the sender if the payment request status is `Pending`
-        if (requestStatus == Types.Status.Pending) {
-            if (msg.sender != request.recipient && msg.sender != request.sender) {
-                revert Errors.OnlyRequestSenderOrRecipient();
-            }
-        }
-        // Checks: `msg.sender` is the recipient or the sender if the payment request status is `Ongoing`
-        // and the payment method is transfer-based
-        else if (request.config.method == Types.Method.Transfer) {
+        // Checks: `msg.sender` is the recipient or the sender when:
+        // - the request status is `Pending`, OR
+        // - the status is `Ongoing` or `Expired` and the payment method is transfer-based
+        if (requestStatus == Types.Status.Pending || request.config.method == Types.Method.Transfer) {
             if (msg.sender != request.recipient && msg.sender != request.sender) {
                 revert Errors.OnlyRequestSenderOrRecipient();
             }
