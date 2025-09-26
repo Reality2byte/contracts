@@ -57,12 +57,13 @@ contract PayRequest_Integration_Fuzz_Test is PayRequest_Integration_Shared_Test 
                 amount: amount,
                 asset: address(usdt),
                 streamId: 0
-            })
+            }),
+            sender: users.eve
         });
 
         // Create the calldata for the {PaymentModule} execution
         bytes memory data = abi.encodeWithSignature(
-            "createRequest((bool,bool,uint40,uint40,address,(bool,uint8,uint8,uint40,address,uint128,uint256)))",
+            "createRequest((bool,bool,uint40,uint40,address,(bool,uint8,uint8,uint40,address,uint128,uint256),address))",
             paymentRequest
         );
 

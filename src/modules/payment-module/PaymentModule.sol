@@ -8,12 +8,11 @@ import { UUPSUpgradeable } from "@openzeppelin/contracts-upgradeable/proxy/utils
 import { Lockup } from "@sablier/lockup/src/types/DataTypes.sol";
 import { ISablierLockup } from "@sablier/lockup/src/interfaces/ISablierLockup.sol";
 import { UD60x18 } from "@prb/math/src/ud60x18/ValueType.sol";
-import { StreamManager } from "./sablier-lockup/StreamManager.sol";
 
+import { StreamManager } from "./sablier-lockup/StreamManager.sol";
 import { Types } from "./libraries/Types.sol";
 import { Errors } from "./libraries/Errors.sol";
 import { IPaymentModule } from "./interfaces/IPaymentModule.sol";
-import { ISpace } from "./../../interfaces/ISpace.sol";
 import { Helpers } from "./libraries/Helpers.sol";
 
 /// @title PaymentModule
@@ -85,23 +84,6 @@ contract PaymentModule is IPaymentModule, StreamManager, UUPSUpgradeable {
     function _authorizeUpgrade(address newImplementation) internal override onlyOwner { }
 
     /*//////////////////////////////////////////////////////////////////////////
-                                      MODIFIERS
-    //////////////////////////////////////////////////////////////////////////*/
-
-    /// @dev Allow only calls from contracts implementing the {ISpace} interface
-    modifier onlySpace() {
-        // Checks: the sender is a valid non-zero code size contract
-        if (msg.sender.code.length == 0) {
-            revert Errors.SpaceZeroCodeSize();
-        }
-
-        // Checks: the sender implements the ERC-165 interface required by {ISpace}
-        bytes4 interfaceId = type(ISpace).interfaceId;
-        if (!ISpace(msg.sender).supportsInterface(interfaceId)) revert Errors.SpaceUnsupportedInterface();
-        _;
-    }
-
-    /*//////////////////////////////////////////////////////////////////////////
                                 CONSTANT FUNCTIONS
     //////////////////////////////////////////////////////////////////////////*/
 
@@ -123,7 +105,7 @@ contract PaymentModule is IPaymentModule, StreamManager, UUPSUpgradeable {
     //////////////////////////////////////////////////////////////////////////*/
 
     /// @inheritdoc IPaymentModule
-    function createRequest(Types.PaymentRequest calldata request) public onlySpace returns (uint256 requestId) {
+    function createRequest(Types.PaymentRequest calldata request) public returns (uint256 requestId) {
         // Checks: the recipient address is not the zero address
         if (request.recipient == address(0)) {
             revert Errors.InvalidZeroAddressRecipient();
@@ -221,7 +203,8 @@ contract PaymentModule is IPaymentModule, StreamManager, UUPSUpgradeable {
                 amount: request.config.amount,
                 asset: request.config.asset,
                 streamId: 0
-            })
+            }),
+            sender: request.sender
         });
 
         // Effects: increment the next payment request ID
@@ -233,6 +216,7 @@ contract PaymentModule is IPaymentModule, StreamManager, UUPSUpgradeable {
         // Log the payment request creation
         emit RequestCreated({
             requestId: requestId,
+            sender: request.sender,
             recipient: request.recipient,
             startTime: request.startTime,
             endTime: request.endTime,
@@ -246,7 +230,7 @@ contract PaymentModule is IPaymentModule, StreamManager, UUPSUpgradeable {
         PaymentModuleStorage storage $ = _getPaymentModuleStorage();
 
         // Load the payment request state from storage
-        Types.PaymentRequest memory request = $.requests[requestId];
+        Types.PaymentRequest storage request = $.requests[requestId];
 
         // Checks: the payment request is not null
         if (request.recipient == address(0)) {
@@ -270,6 +254,12 @@ contract PaymentModule is IPaymentModule, StreamManager, UUPSUpgradeable {
             revert Errors.RequestPaid();
         } else if (requestStatus == Types.Status.Canceled) {
             revert Errors.RequestCanceled();
+        }
+
+        // Checks: `request.sender` is uninitialized, otherwise set it to `msg.sender`
+        // Note: may already be set if the payer was specified when the request was created
+        if (request.sender == address(0)) {
+            request.sender = msg.sender;
         }
 
         // Effects: decrease the number of payments left
@@ -330,17 +320,12 @@ contract PaymentModule is IPaymentModule, StreamManager, UUPSUpgradeable {
             revert Errors.RequestCanceled();
         }
 
-        // Checks: `msg.sender` is the recipient if the payment request status is `Pending`
-        if (requestStatus == Types.Status.Pending) {
-            if (request.recipient != msg.sender) {
-                revert Errors.OnlyRequestRecipient();
-            }
-        }
-        // Checks: `msg.sender` is the recipient if the payment request status is `Ongoing`
-        // and the payment method is transfer-based
-        else if (request.config.method == Types.Method.Transfer) {
-            if (request.recipient != msg.sender) {
-                revert Errors.OnlyRequestRecipient();
+        // Checks: `msg.sender` is the recipient or the sender when:
+        // - the request status is `Pending`, OR
+        // - the status is `Ongoing` or `Expired` and the payment method is transfer-based
+        if (requestStatus == Types.Status.Pending || request.config.method == Types.Method.Transfer) {
+            if (msg.sender != request.recipient && msg.sender != request.sender) {
+                revert Errors.OnlyRequestSenderOrRecipient();
             }
         }
         // Checks, Effects, Interactions: cancel the stream if payment request has already been accepted

@@ -38,8 +38,8 @@ library Errors {
     /// @notice Thrown when a payer attempts to pay a completed payment request
     error RequestPaid();
 
-    /// @notice Thrown when `msg.sender` is not the payment request recipient
-    error OnlyRequestRecipient();
+    /// @notice Thrown when `msg.sender` is not the payment request sender or the recipient
+    error OnlyRequestSenderOrRecipient();
 
     /// @notice Thrown when the recipient address is the zero address
     error InvalidZeroAddressRecipient();

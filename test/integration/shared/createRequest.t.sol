@@ -17,40 +17,66 @@ abstract contract CreateRequest_Integration_Shared_Test is Integration_Test {
 
     function createMockPaymentRequests() internal {
         // Create a mock payment request with a one-off USDT transfer
-        Types.PaymentRequest memory paymentRequest =
-            createPaymentRequestWithOneOffTransfer({ asset: address(usdt), recipient: address(space) });
+        Types.PaymentRequest memory paymentRequest = createPaymentRequestWithOneOffTransfer({
+            asset: address(usdt),
+            sender: users.bob,
+            recipient: address(space)
+        });
         paymentRequests[1] = paymentRequest;
         executeCreatePaymentRequest({ paymentRequest: paymentRequest, user: users.eve });
 
         // Create a mock payment request with a one-off ETH transfer
-        paymentRequest =
-            createPaymentRequestWithOneOffTransfer({ asset: Constants.NATIVE_TOKEN, recipient: address(space) });
+        paymentRequest = createPaymentRequestWithOneOffTransfer({
+            asset: Constants.NATIVE_TOKEN,
+            sender: users.bob,
+            recipient: address(space)
+        });
         paymentRequests[2] = paymentRequest;
         executeCreatePaymentRequest({ paymentRequest: paymentRequest, user: users.eve });
 
         // Create a mock payment request with a recurring USDT transfer
-        paymentRequest =
-            createPaymentWithRecurringTransfer({ recurrence: Types.Recurrence.Weekly, recipient: address(space) });
+        paymentRequest = createPaymentWithRecurringTransfer({
+            recurrence: Types.Recurrence.Weekly,
+            sender: users.bob,
+            recipient: address(space)
+        });
         paymentRequests[3] = paymentRequest;
         executeCreatePaymentRequest({ paymentRequest: paymentRequest, user: users.eve });
 
         // Create a mock payment request with a linear stream payment
-        paymentRequest = createPaymentRequestWithLinearStream({ recipient: address(space) });
+        paymentRequest = createPaymentRequestWithLinearStream({ sender: users.bob, recipient: address(space) });
         paymentRequests[4] = paymentRequest;
         executeCreatePaymentRequest({ paymentRequest: paymentRequest, user: users.eve });
 
         // Create a mock payment request with a tranched stream payment
-        paymentRequest =
-            createPaymentRequestWithTranchedStream({ recurrence: Types.Recurrence.Weekly, recipient: address(space) });
+        paymentRequest = createPaymentRequestWithTranchedStream({
+            recurrence: Types.Recurrence.Weekly,
+            sender: users.bob,
+            recipient: address(space)
+        });
         paymentRequests[5] = paymentRequest;
         executeCreatePaymentRequest({ paymentRequest: paymentRequest, user: users.eve });
 
         // Create a mock payment request with an unlimited USDT transfer
-        paymentRequest = createPaymentWithCustomNoOfTransfers({ asset: address(usdt), recipient: address(space) });
+        paymentRequest =
+            createPaymentWithCustomNoOfTransfers({ asset: address(usdt), recipient: address(space), sender: users.bob });
         paymentRequests[6] = paymentRequest;
         executeCreatePaymentRequest({ paymentRequest: paymentRequest, user: users.eve });
 
-        _nextRequestId = 7;
+        // Create a mock payment request with a one-off ETH transfer and sender not initialized (address(0))
+        paymentRequest = createPaymentRequestWithOneOffTransfer({
+            asset: Constants.NATIVE_TOKEN,
+            sender: address(0),
+            recipient: address(space)
+        });
+        paymentRequests[7] = paymentRequest;
+        executeCreatePaymentRequest({ paymentRequest: paymentRequest, user: users.eve });
+
+        _nextRequestId = 8;
+    }
+
+    modifier whenNotZeroAddress() {
+        _;
     }
 
     modifier whenCallerContract() {
@@ -107,6 +133,7 @@ abstract contract CreateRequest_Integration_Shared_Test is Integration_Test {
 
     function createPaymentWithCustomNoOfTransfers(
         address asset,
+        address sender,
         address recipient
     )
         internal
@@ -114,7 +141,7 @@ abstract contract CreateRequest_Integration_Shared_Test is Integration_Test {
         returns (Types.PaymentRequest memory paymentRequest)
     {
         paymentRequest =
-            _createBasePaymentRequest(recipient, uint40(block.timestamp), uint40(block.timestamp) + 999 weeks);
+            _createBasePaymentRequest(sender, recipient, uint40(block.timestamp), uint40(block.timestamp) + 999 weeks);
 
         paymentRequest.config = Types.Config({
             canExpire: true, // make the payment request expirable
@@ -130,6 +157,7 @@ abstract contract CreateRequest_Integration_Shared_Test is Integration_Test {
     /// @dev Creates a payment request with a one-off transfer payment
     function createPaymentRequestWithOneOffTransfer(
         address asset,
+        address sender,
         address recipient
     )
         internal
@@ -137,7 +165,7 @@ abstract contract CreateRequest_Integration_Shared_Test is Integration_Test {
         returns (Types.PaymentRequest memory paymentRequest)
     {
         paymentRequest =
-            _createBasePaymentRequest(recipient, uint40(block.timestamp), uint40(block.timestamp) + 4 weeks);
+            _createBasePaymentRequest(sender, recipient, uint40(block.timestamp), uint40(block.timestamp) + 4 weeks);
 
         paymentRequest.config = Types.Config({
             canExpire: false,
@@ -153,6 +181,7 @@ abstract contract CreateRequest_Integration_Shared_Test is Integration_Test {
     /// @dev Creates a payment request with a recurring transfer payment
     function createPaymentWithRecurringTransfer(
         Types.Recurrence recurrence,
+        address sender,
         address recipient
     )
         internal
@@ -160,7 +189,7 @@ abstract contract CreateRequest_Integration_Shared_Test is Integration_Test {
         returns (Types.PaymentRequest memory paymentRequest)
     {
         paymentRequest =
-            _createBasePaymentRequest(recipient, uint40(block.timestamp), uint40(block.timestamp) + 4 weeks);
+            _createBasePaymentRequest(sender, recipient, uint40(block.timestamp), uint40(block.timestamp) + 4 weeks);
 
         paymentRequest.config = Types.Config({
             canExpire: false,
@@ -174,13 +203,16 @@ abstract contract CreateRequest_Integration_Shared_Test is Integration_Test {
     }
 
     /// @dev Creates a payment request with a linear stream-based payment
-    function createPaymentRequestWithLinearStream(address recipient)
+    function createPaymentRequestWithLinearStream(
+        address sender,
+        address recipient
+    )
         internal
         view
         returns (Types.PaymentRequest memory paymentRequest)
     {
         paymentRequest =
-            _createBasePaymentRequest(recipient, uint40(block.timestamp), uint40(block.timestamp) + 4 weeks);
+            _createBasePaymentRequest(sender, recipient, uint40(block.timestamp), uint40(block.timestamp) + 4 weeks);
 
         paymentRequest.config = Types.Config({
             canExpire: false,
@@ -196,6 +228,7 @@ abstract contract CreateRequest_Integration_Shared_Test is Integration_Test {
     /// @dev Creates a payment request with a tranched stream-based payment
     function createPaymentRequestWithTranchedStream(
         Types.Recurrence recurrence,
+        address sender,
         address recipient
     )
         internal
@@ -203,7 +236,7 @@ abstract contract CreateRequest_Integration_Shared_Test is Integration_Test {
         returns (Types.PaymentRequest memory paymentRequest)
     {
         paymentRequest =
-            _createBasePaymentRequest(recipient, uint40(block.timestamp), uint40(block.timestamp) + 4 weeks);
+            _createBasePaymentRequest(sender, recipient, uint40(block.timestamp), uint40(block.timestamp) + 4 weeks);
 
         paymentRequest.config = Types.Config({
             canExpire: false,
@@ -222,7 +255,7 @@ abstract contract CreateRequest_Integration_Shared_Test is Integration_Test {
 
         // Create the payment request
         bytes memory data = abi.encodeWithSignature(
-            "createRequest((bool,bool,uint40,uint40,address,(bool,uint8,uint8,uint40,address,uint128,uint256)))",
+            "createRequest((bool,bool,uint40,uint40,address,(bool,uint8,uint8,uint40,address,uint128,uint256),address))",
             paymentRequest
         );
 
@@ -238,6 +271,7 @@ abstract contract CreateRequest_Integration_Shared_Test is Integration_Test {
     }
 
     function _createBasePaymentRequest(
+        address sender,
         address recipient,
         uint40 startTime,
         uint40 endTime
@@ -246,6 +280,7 @@ abstract contract CreateRequest_Integration_Shared_Test is Integration_Test {
         pure
         returns (Types.PaymentRequest memory paymentRequest)
     {
+        paymentRequest.sender = sender;
         paymentRequest.recipient = recipient;
         paymentRequest.startTime = startTime;
         paymentRequest.endTime = endTime;
