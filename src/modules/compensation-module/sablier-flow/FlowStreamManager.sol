@@ -125,13 +125,13 @@ contract FlowStreamManager is IFlowStreamManager, Initializable, OwnableUpgradea
     /// @param recipient The address of the recipient of the compensation component
     /// @param ratePerSecond The rate per second of the compensation component
     /// @param asset The address of the compensation asset
-    /// @param startDate The starting time of the stream; zero means the stream starts at `block.timestamp`
+    /// @param startTime The starting time of the stream; zero means the stream starts at `block.timestamp`
     /// @return streamId The ID of the newly created stream
     function _createStream(
         address recipient,
         UD21x18 ratePerSecond,
         IERC20 asset,
-        uint40 startDate
+        uint40 startTime
     )
         internal
         returns (uint256 streamId)
@@ -145,7 +145,7 @@ contract FlowStreamManager is IFlowStreamManager, Initializable, OwnableUpgradea
                 sender: address(this), // The sender will be able to pause the stream or change rate per second
                 recipient: recipient, // The recipient of the streamed tokens
                 ratePerSecond: ratePerSecond, // The rate per second of the stream
-                startTime: startDate, // The starting time of the stream. Zero means startTime is block.timestamp
+                startTime: startTime, // The starting time of the stream. Zero means startTime is block.timestamp
                 token: asset, // The streaming token
                 transferable: false // Whether the stream will be transferable or not
             });

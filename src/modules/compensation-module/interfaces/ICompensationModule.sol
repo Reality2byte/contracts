@@ -87,7 +87,7 @@ interface ICompensationModule {
     /// @param ratePerSecond The rate per second of the compensation component
     /// @param componentType The type of compensation component
     /// @param asset The address of the compensation asset
-    /// @param startDate The timestamp when the compensation component stream starts; a value of zero means the
+    /// @param startTime The timestamp when the compensation component stream starts; a value of zero means the
     /// stream starts at `block.timestamp`
     ///
     /// @return componentId The ID of the newly created compensation
@@ -97,7 +97,7 @@ interface ICompensationModule {
         UD21x18 ratePerSecond,
         Types.ComponentType componentType,
         IERC20 asset,
-        uint40 startDate
+        uint40 startTime
     )
         external
         returns (uint256 componentId, uint256 streamId);

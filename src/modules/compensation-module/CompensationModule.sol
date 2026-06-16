@@ -150,7 +150,7 @@ contract CompensationModule is ICompensationModule, FlowStreamManager, UUPSUpgra
         UD21x18 ratePerSecond,
         Types.ComponentType componentType,
         IERC20 asset,
-        uint40 startDate
+        uint40 startTime
     )
         external
         returns (uint256 componentId, uint256 streamId)
@@ -159,7 +159,7 @@ contract CompensationModule is ICompensationModule, FlowStreamManager, UUPSUpgra
         if (recipient == address(0)) revert Errors.InvalidZeroAddressRecipient();
 
         // Checks, Effects, Interactions: create the compensation component
-        (componentId, streamId) = _createComponent(recipient, ratePerSecond, componentType, asset, startDate);
+        (componentId, streamId) = _createComponent(recipient, ratePerSecond, componentType, asset, startTime);
 
         // Log the compensation creation
         emit ComponentCreated(componentId, recipient, streamId);
@@ -351,7 +351,7 @@ contract CompensationModule is ICompensationModule, FlowStreamManager, UUPSUpgra
         UD21x18 ratePerSecond,
         Types.ComponentType componentType,
         IERC20 asset,
-        uint40 startDate
+        uint40 startTime
     )
         internal
         returns (uint256 componentId, uint256 streamId)
@@ -366,7 +366,7 @@ contract CompensationModule is ICompensationModule, FlowStreamManager, UUPSUpgra
         if (ratePerSecond.unwrap() == 0) revert Errors.InvalidZeroRatePerSecond();
 
         // Checks, Effects, Interactions: create the Sablier Flow stream
-        streamId = _createStream(recipient, ratePerSecond, asset, startDate);
+        streamId = _createStream(recipient, ratePerSecond, asset, startTime);
 
         // Effects: create the compensation component
         $.components[componentId] = Types.CompensationComponent({
