@@ -44,7 +44,7 @@ deploy-deterministic-module-keeper:
 #	- {RPC_URL} with the network RPC used for deployment
 #	- {ETHERSCAN_API_KEY} with the Etherscan API key on the target chain
 deploy-deterministic-station-registry:
-					forge script script/DeployDeterministicStationRegistry.s.sol:DeployDeterministicStationRegistry \
+					FOUNDRY_PROFILE=optimized forge script script/DeployDeterministicStationRegistry.s.sol:DeployDeterministicStationRegistry \
 					--sig "run(string,address)" $(CREATE3SALT) $(MODULE_KEEPER) \
 					--rpc-url $(RPC_URL) \
 					--account werk-deployer --etherscan-api-key $(ETHERSCAN_API_KEY) \
