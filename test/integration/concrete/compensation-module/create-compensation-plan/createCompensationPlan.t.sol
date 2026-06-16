@@ -22,11 +22,12 @@ contract createComponent_Integration_Concrete_Test is CompensationModule_Integra
 
         // Create the calldata for the `createComponent` function call
         bytes memory data = abi.encodeWithSignature(
-            "createComponent(address,uint128,uint8,address)",
+            "createComponent(address,uint128,uint8,address,uint40)",
             address(0),
             initialComponent.ratePerSecond,
             uint8(initialComponent.componentType),
-            address(initialComponent.asset)
+            address(initialComponent.asset),
+            uint40(0)
         );
 
         // Expect the call to revert with the {InvalidZeroAddressRecipient} error
@@ -48,11 +49,12 @@ contract createComponent_Integration_Concrete_Test is CompensationModule_Integra
 
         // Create the calldata for the `createComponent` function call
         bytes memory data = abi.encodeWithSignature(
-            "createComponent(address,uint128,uint8,address)",
+            "createComponent(address,uint128,uint8,address,uint40)",
             users.bob,
             initialComponent.ratePerSecond,
             uint8(initialComponent.componentType),
-            address(initialComponent.asset)
+            address(initialComponent.asset),
+            uint40(0)
         );
 
         // Expect the call to revert with the {InvalidZeroRatePerSecond} error
@@ -71,11 +73,12 @@ contract createComponent_Integration_Concrete_Test is CompensationModule_Integra
 
         // Create the calldata for the `createComponent` function call
         bytes memory data = abi.encodeWithSignature(
-            "createComponent(address,uint128,uint8,address)",
+            "createComponent(address,uint128,uint8,address,uint40)",
             users.bob,
             initialComponent.ratePerSecond,
             uint8(initialComponent.componentType),
-            address(initialComponent.asset)
+            address(initialComponent.asset),
+            uint40(0)
         );
 
         // Expect the {ComponentCreated} event to be emitted
