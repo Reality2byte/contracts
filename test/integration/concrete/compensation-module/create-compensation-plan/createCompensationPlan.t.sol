@@ -71,14 +71,17 @@ contract createComponent_Integration_Concrete_Test is CompensationModule_Integra
         // Create a mock compensation component with an initial Payroll component
         Types.CompensationComponent memory initialComponent = createMockComponent(Types.ComponentType.Payroll);
 
-        // Create the calldata for the `createComponent` function call
+        // Set a start time 30 days in the future so the stream starts later than `block.timestamp`
+        uint40 futureStartTime = uint40(block.timestamp + 30 days);
+
+        // Create the calldata for the `createComponent` function call with the future start time
         bytes memory data = abi.encodeWithSignature(
             "createComponent(address,uint128,uint8,address,uint40)",
             users.bob,
             initialComponent.ratePerSecond,
             uint8(initialComponent.componentType),
             address(initialComponent.asset),
-            uint40(0)
+            futureStartTime
         );
 
         // Expect the {ComponentCreated} event to be emitted
@@ -94,5 +97,10 @@ contract createComponent_Integration_Concrete_Test is CompensationModule_Integra
         assertEq(address(actualComponent.asset), address(usdt));
         assertEq(actualComponent.ratePerSecond.unwrap(), Constants.RATE_PER_SECOND.unwrap());
         assertEq(actualComponent.streamId, 1);
+
+        // Assert the stream's snapshot time equals the requested future start time
+        uint40 actualStartTime = sablierFlow.getSnapshotTime(actualComponent.streamId);
+        assertEq(actualStartTime, futureStartTime);
+        assertGt(actualStartTime, uint40(block.timestamp));
     }
 }
