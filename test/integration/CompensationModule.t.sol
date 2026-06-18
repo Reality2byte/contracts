@@ -73,11 +73,12 @@ contract CompensationModule_Integration_Test is Integration_Test {
 
         // Create the calldata for the `createComponent` function call with Bob as the recipient
         bytes memory data = abi.encodeWithSignature(
-            "createComponent(address,uint128,uint8,address)",
+            "createComponent(address,uint128,uint8,address,uint40)",
             users.bob,
             component.ratePerSecond,
             uint8(component.componentType),
-            address(component.asset)
+            address(component.asset),
+            uint40(0)
         );
 
         // Create the compensation component

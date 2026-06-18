@@ -7,4 +7,5 @@ createCompensationPlan.t.sol
     └── when the initial component has a non-zero rate per second
         ├── it should create the compensation component
         ├── it should create the compensation component stream
-        └── it should emit the {ComponentCreated} event
+        ├── it should emit the {ComponentCreated} event
+        └── it should start the component stream according to the provided start time
